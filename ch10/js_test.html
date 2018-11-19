@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+<script src="https://code.jquery.com/jquery-git.js"></script>
+<style>
+    li {
+        display: inline-block;
+        padding: 3px;
+        border: 1px solid;
+        color:blue;
+    }
+    li.active {
+        border-color: red;
+        color: red;
+    }
+    li a {
+        color:blue;
+    }
+    li.active a {
+        color:red;
+    }
+
+    
+    .frame {
+        display: inline-block;
+        padding: 3px;
+        border: 1px solid;
+        color:blue;
+    }
+    .frame .active {
+        border-color: red;
+        color: red;
+    }
+    .frame a {
+        color:blue;
+    }
+    .frame .active a {
+        color:red;
+    }
+</style>
+</head>
+<body>
+  
+    <ul class="tabs">
+        <li>
+            <a href="#home">TAB Home</a>
+        </li>
+        <li>
+            <a href="#about">TAB About</a>
+
+        </li>
+        <li>
+            <a href="#news">TAB News</a>
+        </li>
+    </ul>
+
+    <div>
+        <div id="home">home content</div>
+        <div id="about">about content</div>
+        <div id="news">news content</div>
+    </div>
+
+    
+  
+    <div class="frame">
+        <div>
+            <p>
+                <a href="#image1">box image1</a>
+            </p>
+            <p>
+                <a href="#image2">box image2</a>
+
+            </p>
+            <p>
+                <a href="#image3">box image3</a>
+            </p>
+        </div>
+
+        <div>
+            <div id="image1"><img src="https://images.freeimages.com/images/small-previews/3d3/droplets-1395002.jpg"></div>
+            <div id="image2"><img src="https://images.freeimages.com/images/small-previews/48b/yellow-flower-1362949.jpg"></div>
+            <div id="image3"><img src="https://images.freeimages.com/images/small-previews/47a/yellow-flower-1364860.jpg"></div>
+        </div>
+    </div>
+
+</body>
+<script>
+    $(function() {
+        switchTab( 'ul.tabs li' );
+        switchTab( '.frame p', 2 );  //傳4就死掉
+        
+        function switchTab(_target, _specifyShowTab) {
+            var _specifyShowTab = _specifyShowTab ? _specifyShowTab : 0;
+            var _tabNameId = $(_target).find('a');
+            var _tabsContentId = [];
+
+            init();  //init()傳 跟 specifyTab()傳 差別?
+
+            $(_target).on('click', function(){
+                unfocusTab();
+                focusActiveTab( $(this) );
+                hiddenTabContent();
+                showActiveTabContent( $(this) );
+            });
+
+            function init() {
+                hiddenTabContent();
+                specifyTab(_specifyShowTab);  //init()傳 跟 specifyTab()傳 差別?
+            }
+
+            function specifyTab(aa) {  //init()傳 跟 specifyTab()傳 差別?
+                var currentTab = $(_target).eq(aa);
+                currentTab.addClass('active');
+                showActiveTabContent(currentTab);
+            }
+            function unfocusTab() {
+                $(_target).removeClass('active');
+            }
+
+            function focusActiveTab(currentTab) {
+                currentTab.addClass('active');
+            }
+
+            function hiddenTabContent() {
+                findTabContent();
+                for (var i = 0; i < _tabsContentId.length; i++) {
+                    $(_tabsContentId[i]).hide();
+                }
+            }
+
+            function findTabContent() {
+                _tabNameId.each(function() {
+                    _tabsContentId.push( $(this).attr('href') );
+                });
+            }
+
+            function showActiveTabContent(currentTab) {
+                $( activeTabId(currentTab) ).show();
+            }
+
+            function activeTabId(currentTab) {
+                return currentTab.find('a').attr('href');
+            }
+        }
+    });
+</script>
+</html>
