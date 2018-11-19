@@ -87,83 +87,64 @@
 
 </body>
 <script>
-            // 找TBA對應的內容ID，組成array
-            // 初始預設：點擊特定TAB
-            // click後做的事情: 取消焦點、顯示當前
-            // 取消焦點：取消TAB、取消內容
-            // 顯示當前：(判斷傳入當前數字)、顯示TAB、顯示內容
 
-    /* 從JS架構不清楚是否可直接操作「內容DOM元素」
-    * 因此，HTML結構必須有<a>及href屬性
-    * 內容的DOM必須有個別ID
-    * href與ID必須一致才能對應
-    */
-    $(function() {
+    function switchTabProto(_target, _specifyShowTab){
+        this._tabsContentId = [];
+        this._target = _target;
+        this._specifyShowTab = _specifyShowTab;
+        //var that = this;
         
-        var flowerTab = new switchTab('ul.tabs li', 2);
-        var flowerTab = new switchTab('.frame p');
-
-        // switchTab( 'ul.tabs li', 2 );
-        // switchTab( '.frame p' );
-
+        $(_target).find('a').each(function(i, e) {
+            this._tabsContentId.push( $(e).attr('href') );
+        }.bind(this));
         
-        function switchTab(_target, _specifyShowTab) {
-            var _tabsContentId = [];
+        this.init();
+    }
 
-            $(_target).on('click', function(){
+    switchTabProto.prototype = {
+        init: function() {
+            var that = this;
+            this.clickTab(this._specifyShowTab);
+            $(this._target).on('click', function(){
                 var _clickSequence = $(this).index();
-                clickTab(_clickSequence);
+                that.clickTab(_clickSequence);
             });
-            
-            findTabContent();
-            init();
-
-            function findTabContent() {
-                $(_target).find('a').each(function() {
-                    _tabsContentId.push( $(this).attr('href') );
-                });
+        },
+        clickTab: function(e) {
+            this.unfocusAll();
+            this.showCurrent(e);
+        },
+        unfocusAll: function() {
+            this.unfocusTab();
+            this.hideContentAll();
+        },
+        unfocusTab: function() {
+            $(this._target).removeClass('active');
+        },
+        hideContentAll: function(array) {
+            $.each(this._tabsContentId, function(index, value){
+                $(value).hide();
+            });
+        },
+        showCurrent: function(sequence) {
+            if(! Number.isInteger(sequence) || sequence === undefined || sequence < 0 || sequence >= this._tabsContentId.length ) {
+                sequence = 0;
             }
-            
-            function init() {
-                clickTab(_specifyShowTab);
-            }
-            
-            function clickTab(e) {
-                unfocusAll();
-                showCurrent(e);
-            }
-
-            function unfocusAll() {
-                unfocusTab();
-                hideContentAll();
-            }
-                
-                function unfocusTab() {
-                    $(_target).removeClass('active');
-                }
-
-                function hideContentAll(array) {
-                    $.each(_tabsContentId, function(index, value){
-                        $(value).hide();
-                    });
-                }
-
-            function showCurrent(sequence) {
-                if(! Number.isInteger(sequence) || sequence === undefined || sequence < 0 || sequence >= _tabsContentId.length ) {
-                    sequence = 0;
-                }
-                focusActiveTab(sequence);
-                showActiveTabContent(sequence);
-            }
-
-                function focusActiveTab(e) {
-                    $(_target).eq(e).addClass('active');
-                }
-
-                function showActiveTabContent(e) {
-                    $( _tabsContentId[e] ).fadeIn();
-                }
+            this.focusActiveTab(sequence);
+            this.showActiveTabContent(sequence);
+        },
+        focusActiveTab: function(e) {
+            $(this._target).eq(e).addClass('active');
+        },
+        showActiveTabContent: function(e) {
+            $( this._tabsContentId[e] ).fadeIn();
         }
+    };
+
+
+    $(function() {
+        var textTab = new switchTabProto('ul.tabs li', 2);
+        var flowerTab = new switchTabProto('.frame p', 1);
     });
 </script>
 </html>
