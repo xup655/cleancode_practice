@@ -4,43 +4,44 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>JS Bin</title>
-<script src="https://code.jquery.com/jquery-git.js"></script>
-<style>
-    li {
-        display: inline-block;
-        padding: 3px;
-        border: 1px solid;
-        color:blue;
-    }
-    li.active {
-        border-color: red;
-        color: red;
-    }
-    li a {
-        color:blue;
-    }
-    li.active a {
-        color:red;
-    }
+    <script src="https://code.jquery.com/jquery-git.js"></script>
 
-    
-    .frame {
-        display: inline-block;
-        padding: 3px;
-        border: 1px solid;
-        color:blue;
-    }
-    .frame .active {
-        border-color: red;
-        color: red;
-    }
-    .frame a {
-        color:blue;
-    }
-    .frame .active a {
-        color:red;
-    }
-</style>
+    <style>
+        li {
+            display: inline-block;
+            padding: 3px;
+            border: 1px solid;
+            color:blue;
+        }
+        li.active {
+            border-color: red;
+            color: red;
+        }
+        li a {
+            color:blue;
+        }
+        li.active a {
+            color:red;
+        }
+
+        
+        .frame {
+            display: inline-block;
+            padding: 3px;
+            border: 1px solid;
+            color:blue;
+        }
+        .frame .active {
+            border-color: red;
+            color: red;
+        }
+        .frame a {
+            color:blue;
+        }
+        .frame .active a {
+            color:red;
+        }
+    </style>
 </head>
 <body>
   
@@ -50,7 +51,6 @@
         </li>
         <li>
             <a href="#about">TAB About</a>
-
         </li>
         <li>
             <a href="#news">TAB News</a>
@@ -58,9 +58,9 @@
     </ul>
 
     <div>
+        <div id="news">news content</div>
         <div id="home">home content</div>
         <div id="about">about content</div>
-        <div id="news">news content</div>
     </div>
 
     
@@ -72,7 +72,6 @@
             </p>
             <p>
                 <a href="#image2">box image2</a>
-
             </p>
             <p>
                 <a href="#image3">box image3</a>
@@ -88,62 +87,75 @@
 
 </body>
 <script>
+    /* HTML結構必須有<a>及href屬性
+    * 內容的DOM必須有個別ID
+    * href與ID必須一致才能對應
+    */
     $(function() {
-        switchTab( 'ul.tabs li' );
-        switchTab( '.frame p', 2 );  //傳4就死掉
+        switchTab( 'ul.tabs li', 2 );
+        switchTab( '.frame p' );
         
         function switchTab(_target, _specifyShowTab) {
-            var _specifyShowTab = _specifyShowTab ? _specifyShowTab : 0;
-            var _tabNameId = $(_target).find('a');
             var _tabsContentId = [];
 
-            init();  //init()傳 跟 specifyTab()傳 差別?
-
             $(_target).on('click', function(){
-                unfocusTab();
-                focusActiveTab( $(this) );
-                hiddenTabContent();
-                showActiveTabContent( $(this) );
+                var _clickSequence = $(this).index();
+                clickTab(_clickSequence);
             });
+            
+            findTabContent();
+            init();
 
-            function init() {
-                hiddenTabContent();
-                specifyTab(_specifyShowTab);  //init()傳 跟 specifyTab()傳 差別?
-            }
-
-            function specifyTab(aa) {  //init()傳 跟 specifyTab()傳 差別?
-                var currentTab = $(_target).eq(aa);
-                currentTab.addClass('active');
-                showActiveTabContent(currentTab);
-            }
-            function unfocusTab() {
-                $(_target).removeClass('active');
-            }
-
-            function focusActiveTab(currentTab) {
-                currentTab.addClass('active');
-            }
-
-            function hiddenTabContent() {
-                findTabContent();
-                for (var i = 0; i < _tabsContentId.length; i++) {
-                    $(_tabsContentId[i]).hide();
-                }
-            }
-
+            // 找TBA對應的內容ID，組成array
             function findTabContent() {
-                _tabNameId.each(function() {
+                $(_target).find('a').each(function() {
                     _tabsContentId.push( $(this).attr('href') );
                 });
             }
-
-            function showActiveTabContent(currentTab) {
-                $( activeTabId(currentTab) ).show();
+            
+            // 初始預設：點擊特定TAB
+            function init() {
+                clickTab(_specifyShowTab);
+            }
+            
+            // click後做的事情: 取消焦點、顯示當前
+            function clickTab(e) {
+                unfocusAll();
+                showCurrent(e);
             }
 
-            function activeTabId(currentTab) {
-                return currentTab.find('a').attr('href');
+            // 取消焦點：取消TAB、取消內容
+            function unfocusAll() {
+                unfocusTab();
+                hideContentAll();
             }
+                
+                function unfocusTab() {
+                    $(_target).removeClass('active');
+                }
+
+                function hideContentAll(array) {
+                    $.each(_tabsContentId, function(index, value){
+                        $(value).hide();
+                    });
+                }
+
+            // 顯示當前：(判斷傳入當前數字)、顯示TAB、顯示內容
+            function showCurrent(sequence) {
+                if(! Number.isInteger(sequence) || sequence === undefined || sequence < 0 || sequence >= _tabsContentId.length ) {
+                    sequence = 0;
+                }
+                focusActiveTab(sequence);
+                showActiveTabContent(sequence);
+            }
+
+                function focusActiveTab(e) {
+                    $(_target).eq(e).addClass('active');
+                }
+
+                function showActiveTabContent(e) {
+                    $( _tabsContentId[e] ).fadeIn();
+                }
         }
     });
 </script>
