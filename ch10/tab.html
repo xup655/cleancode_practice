@@ -24,7 +24,7 @@
             color:red;
         }
 
-        
+
         .frame {
             display: inline-block;
             padding: 3px;
@@ -44,7 +44,7 @@
     </style>
 </head>
 <body>
-  
+
     <ul class="tabs">
         <li>
             <a href="#home">TAB Home</a>
@@ -63,8 +63,8 @@
         <div id="about">about content</div>
     </div>
 
-    
-  
+
+
     <div class="frame">
         <div>
             <p>
@@ -92,12 +92,11 @@
         this._tabsContentId = [];
         this._target = _target;
         this._specifyShowTab = _specifyShowTab;
-        //var that = this;
-        
+
         $(_target).find('a').each(function(i, e) {
             this._tabsContentId.push( $(e).attr('href') );
         }.bind(this));
-        
+
         this.init();
     }
 
@@ -105,42 +104,46 @@
         init: function() {
             var that = this;
             this.clickTab(this._specifyShowTab);
+
             $(this._target).on('click', function(){
                 var _clickSequence = $(this).index();
                 that.clickTab(_clickSequence);
             });
         },
         clickTab: function(e) {
-            this.unfocusAll();
-            this.showCurrent(e);
-        },
-        unfocusAll: function() {
             this.unfocusTab();
-            this.hideContentAll();
+            this.hideContent();
+            this.focusCurrent(e);
         },
         unfocusTab: function() {
             $(this._target).removeClass('active');
         },
-        hideContentAll: function(array) {
+        hideContent: function(array) {
             $.each(this._tabsContentId, function(index, value){
                 $(value).hide();
             });
         },
-        showCurrent: function(sequence) {
-            if(! Number.isInteger(sequence) || sequence === undefined || sequence < 0 || sequence >= this._tabsContentId.length ) {
+        focusCurrent: function(sequence) {
+            if(this.isSequence(sequence)) {
                 sequence = 0;
             }
-            this.focusActiveTab(sequence);
-            this.showActiveTabContent(sequence);
+            this.focusCurrentTab(sequence);
+            this.focusCurrentContent(sequence);
         },
-        focusActiveTab: function(e) {
+        focusCurrentTab: function(e) {
             $(this._target).eq(e).addClass('active');
         },
-        showActiveTabContent: function(e) {
+        focusCurrentContent: function(e) {
             $( this._tabsContentId[e] ).fadeIn();
+        },
+        isSequence: function(sequence){
+            return ! Number.isInteger(sequence)
+            || sequence === undefined
+            || sequence < 0
+            || sequence >= this._tabsContentId.length;
         }
-    };
 
+    };
 
     $(function() {
         var textTab = new switchTabProto('ul.tabs li', 2);
