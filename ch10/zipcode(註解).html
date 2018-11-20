@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>ZipCode</title>
+    <script src="https://code.jquery.com/jquery-git.js"></script>
+
+    <style>
+    
+
+    </style>
+</head>
+<body>
+    
+    <select id="addressSelector1">
+        <option selected>000</option>
+        <option selected>000</option>
+        <option>111</option>
+    </select>
+    
+    <select id="addressSelector2">
+        <option>222</option>
+        <option selected>333</option>
+    </select>
+    <p id="mapMessage">#mapMessage</p>
+    <button id="button_getlatlng">#button_getlatlng</button>
+
+    <input id="user_address">
+    <input id="addressZipCode" value="組好地址顯示在這兒">
+    <div id="map">map</div>
+
+</body>
+<script>
+baseUrl = 'https://'    ////////// 暫時讓console不出錯 //////////
+
+
+    // 縣市
+    var addressCounty = '';
+    // 地址區
+    var addressArea = '';
+    // 郵遞區號
+    var addressZipCode = '';
+
+    // 初始化程式(主程式?)
+    // 送obj(json格式: zip)去API(/ajax/zipcode/init)，
+    // 沒有錯誤訊息
+    var initZipCode = function () {
+        $.ajax({
+            type : 'POST',
+            url  : baseUrl + '/ajax/zipcode/init',
+            data : { zipCode: addressZipCode },
+            success: function (json) {
+                addressCounty = String(json.county);
+                addressArea = String(json.area);
+                buildAddressCounty();
+            },
+            dataType: 'json'
+        });
+    };
+
+    // build縣市
+    var buildAddressCounty = function () {
+        $.ajax({
+            type : 'POST',
+            url  : baseUrl + '/ajax/zipcode/county',
+            success: addressCountyUpdate,
+            dataType: 'json'
+        });
+    }
+    // 更新縣市
+    var addressCountyUpdate = function (json) {
+        _build(json, '#addressSelector1', addressCounty);  // _build方法參數: json, selector, selectedId
+        addressCountyChange.apply($('#addressSelector1'));  // .call(this, arg1, arg2); /  .apply(this, [arg1, arg2]) 作用完全一样，只是接受参数的方式不太一样
+    };
+
+    // 改變縣市
+    var addressCountyChange = function () {
+        $.ajax({
+            type : 'POST',
+            url  : baseUrl + '/ajax/zipcode/area',
+            data : { county: $(this).val() },
+            success: addressAreaUpdate,
+            dataType: 'json'
+        });
+    };
+    // 更新地址區
+    var addressAreaUpdate = function (json) {
+        _build(json, '#addressAreaSelector', addressArea);
+        addressAreaChange.apply($('#addressAreaSelector'));
+    };
+    // 改變地址區
+    /****
+     * 1. 在input顯示(顯示:傳入的val())
+     * 2. 標記google map位置
+     */
+    var addressAreaChange = function () {
+        $('#addressZipCode').val($(this).val());
+        
+        //GoogleMap
+        if($('#map').length > 0){
+
+            wa = new WaMap();
+            wa.base();
+
+            var zoom = parseInt($('#zoom').val());
+            var lat = $('#lat').val();
+            var lng = $('#lng').val();
+
+            // zoom是整數 拿到經緯度的值
+            if(zoom && lat && lng){
+                wa.point = new GLatLng(lat,lng);
+                wa.zoom = zoom;
+                wa.base();
+                wa.dragable = true;
+                wa.addMarker();
+                wa.addControl('small');
+                wa.__dragend();
+                wa.__moveend();
+
+            }else{
+                // 拿到組好的zip+地址
+                if(getAddress()) {
+                    $('#div_zoom').css('display','none');
+                    wa.dragable = true;
+                    wa.getLatLng(getAddress(),true);
+                }
+            }
+
+            wa.update();
+
+        }
+    };
+
+    // 取地址 return 組好的zip+地址
+    var getAddress = function(){
+        var country = $('#addressSelector1 option[@selected]').html();
+        var area = $('#addressSelector2 option[@selected]').html();
+        var address = $('#user_address').attr('value');
+        var zipCode = $('#addressZipCode').val();
+        var Address = '';
+
+        country == area ?
+            Address = zipCode + country + address :
+            Address = zipCode + country + area + address ;
+
+        return Address;  //ex: 92047 (屏東縣) 屏東市 中正路111號
+    }
+
+    /**
+    * 建立選項
+    *
+    */
+    var _build = function (json, selector, selectedId) {
+        var selected = true;
+        
+        $(selector).removeOption(/./);  //removeOption???????????????
+        for (id in json) {
+            se = (String(selectedId) == String(id)) ? true : false;
+            $(selector).addOption(id, json[id], se);
+        }
+    }
+
+    $(document).ready(function () {
+        $('#addressSelector1').change(addressCountyChange);  // 當下拉改變時ajax戳戳API(/ajax/zipcode/area)
+        $('#addressSelector2').change(addressAreaChange);  // 當下拉改變時戳戳API
+        initZipCode();
+
+        $('#button_getlatlng').click(function(){
+            // gmap的方法 (沒拿到組好的zip+地址??
+            wa.getLatLng(getAddress(),true);
+        })
+
+        $('#mapMessage').css('display','none');
+
+    });
+</script>
+</html>

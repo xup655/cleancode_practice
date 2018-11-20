@@ -1,7 +1,5 @@
 var addressCounty = '';
-
 var addressArea = '';
-
 var addressZipCode = '';
 
 var initZipCode = function () {
@@ -12,27 +10,32 @@ var initZipCode = function () {
         success: function (json) {
             addressCounty = String(json.county);
             addressArea = String(json.area);
-            buildAddressCounty();
+            /*buildAddressCounty();*/
+            setAdministration('county');
         },
         dataType: 'json'
     });
 };
 
-var buildAddressCounty = function () {
+var setAdministration = function (administration) {
+    $.ajax({
+        type : 'POST',
+        url  : baseUrl + '/ajax/zipcode/' + administration,
+        success: updateAdministration,
+        dataType: 'json'
+    });
+}
+
+/*var buildAddressCounty = function () {
     $.ajax({
         type : 'POST',
         url  : baseUrl + '/ajax/zipcode/county',
         success: addressCountyUpdate,
         dataType: 'json'
     });
-}
+}*/
 
-var addressCountyUpdate = function (json) {
-    _build(json, '#addressSelector1', addressCounty);
-    addressCountyChange.apply($('#addressSelector1'));
-};
-
-var addressCountyChange = function () {
+/*var addressCountyChange = function () {
     $.ajax({
         type : 'POST',
         url  : baseUrl + '/ajax/zipcode/area',
@@ -40,12 +43,40 @@ var addressCountyChange = function () {
         success: addressAreaUpdate,
         dataType: 'json'
     });
-};
+};*/
 
-var addressAreaUpdate = function (json) {
+var updateAdministration = function (json) {
+    // var selector = '#addressSelector1';
+    // var selector = '#addressAreaSelector';
+
+    // var selectedId = addressCounty;
+    // var selectedId = addressArea;
+
+    // var handler = addressCountyChange;
+    // var handler = addressAreaChange;
+    _build(json, selector, selectedId);
+    handler.apply( $(selector) );
+}
+
+/*var addressCountyUpdate = function (json) {
+    _build(json, '#addressSelector1', addressCounty);
+    addressCountyChange.apply($('#addressSelector1'));
+};*/
+
+/*var addressAreaUpdate = function (json) {
     _build(json, '#addressAreaSelector', addressArea);
     addressAreaChange.apply($('#addressAreaSelector'));
-};
+};*/
+
+var _build = function (json, selector, selectedId) {
+    /*var selected = true;*/
+    
+    $(selector).removeOption(/./);
+    for (id in json) {
+        se = (String(selectedId) == String(id)) ? true : false;
+        $(selector).addOption(id, json[id], se);
+    }
+}
 
 var addressAreaChange = function () {
     $('#addressZipCode').val($(this).val());
@@ -94,27 +125,25 @@ var getAddress = function(){
 
     return Address;
 }
-/**
- * 建立選項
- *
- */
-var _build = function (json, selector, selectedId) {
-    var selected = true;
-    
-    $(selector).removeOption(/./);
-    for (id in json) {
-        se = (String(selectedId) == String(id)) ? true : false;
-        $(selector).addOption(id, json[id], se);
-    }
-}
 
 $(document).ready(function () {
-    $('#addressSelector1').change(addressCountyChange);
+
+    // 把onChange綁定抽出，讓參數控制執行 地址變 或 地區變
+    // var $input = $('select[id*="addressSelector"]')
+    // $input.on('change', function(value, handler){
+    //     handler(value)  // 改地址/改地區?????????????????????????
+    // })
+    
+    $('#addressSelector1').change( setAdministration('area') );
     $('#addressSelector2').change(addressAreaChange);
+    
+    /* $('#addressSelector1').change(addressCountyChange); */
+    /* $('#addressSelector2').change(addressAreaChange); */
+    
     initZipCode();
 
     $('#button_getlatlng').click(function(){
-        wa.getLatLng(getAddress(),true);
+        wa.getLatLng(getAddress(),true);  // gmap的方法 (沒拿到組好的zip+地址?????
     })
 
     $('#mapMessage').css('display','none');
