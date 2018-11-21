@@ -42,9 +42,7 @@ baseUrl = 'https://'    ////////// 暫時讓console不出錯 //////////
     // 郵遞區號
     var addressZipCode = '';
 
-    // 初始化程式(主程式?)
-    // 送obj(json格式: zip)去API(/ajax/zipcode/init)，
-    // 沒有錯誤訊息
+    // 初始化就post給ajax，取得「字串:縣市」以及「字串:區」
     var initZipCode = function () {
         $.ajax({
             type : 'POST',
@@ -59,7 +57,7 @@ baseUrl = 'https://'    ////////// 暫時讓console不出錯 //////////
         });
     };
 
-    // build縣市
+    // 用update取得縣市
     var buildAddressCounty = function () {
         $.ajax({
             type : 'POST',
@@ -74,7 +72,7 @@ baseUrl = 'https://'    ////////// 暫時讓console不出錯 //////////
         addressCountyChange.apply($('#addressSelector1'));  // .call(this, arg1, arg2); /  .apply(this, [arg1, arg2]) 作用完全一样，只是接受参数的方式不太一样
     };
 
-    // 改變縣市
+    // 用update，取得區
     var addressCountyChange = function () {
         $.ajax({
             type : 'POST',
@@ -151,12 +149,15 @@ baseUrl = 'https://'    ////////// 暫時讓console不出錯 //////////
     * 建立選項
     *
     */
+    // 把josn的id塞進<select>裡頭
     var _build = function (json, selector, selectedId) {
         var selected = true;
         
         $(selector).removeOption(/./);  //removeOption???????????????
         for (id in json) {
             se = (String(selectedId) == String(id)) ? true : false;
+            // array中有符合傳入的id，就加入<select>裡
+            // 自定義方法addOption()方法做了什麼不得而知    ex: $('#addressAreaSelector').addOption(id,json[id], true);
             $(selector).addOption(id, json[id], se);
         }
     }
@@ -164,6 +165,8 @@ baseUrl = 'https://'    ////////// 暫時讓console不出錯 //////////
     $(document).ready(function () {
         $('#addressSelector1').change(addressCountyChange);  // 當下拉改變時ajax戳戳API(/ajax/zipcode/area)
         $('#addressSelector2').change(addressAreaChange);  // 當下拉改變時戳戳API
+
+        // 若ajax失敗，沒有錯誤訊息
         initZipCode();
 
         $('#button_getlatlng').click(function(){

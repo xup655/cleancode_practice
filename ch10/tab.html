@@ -138,7 +138,7 @@
         },
         isSequence: function(sequence){
             return ! Number.isInteger(sequence)
-            || sequence === undefined
+            || typeof(sequence) === 'undefined'
             || sequence < 0
             || sequence >= this._tabsContentId.length;
         }
