@@ -4,12 +4,12 @@ var addressArea = '';
 
 var addressZipCode = '';
 
-var postUrl = function(administration, handler, postData) {
-    var postData = postData ? postData : {} ;
+var postUrl = function(postPath, handler, postData) {
+    var postData = postData ? postData : {};
 
     $.ajax({
         type : 'POST',
-        url  : baseUrl + '/ajax/zipcode/' + administration,
+        url  : baseUrl + '/ajax/zipcode/' + postPath,
         data : postData,
         success: handler,
         dataType: 'json'
@@ -19,6 +19,7 @@ var postUrl = function(administration, handler, postData) {
 var initZipCode = function () {
     var postData = { zipCode: addressZipCode };
     postUrl('init', addressInit, postData);
+    postUrl()
 };
 
 var addressInit = function (json) {
@@ -92,7 +93,7 @@ var getAddress = function(){
 }
 
 var _build = function (json, selector, selectedId) {
-    /*var selected = true;*/
+    var selected = true;
 
     $(selector).removeOption(/./);
     for (id in json) {
@@ -109,9 +110,9 @@ $(document).ready(function () {
     $('#button_getlatlng').click(function(){
         try {
             wa.getLatLng(getAddress(),true);
-            throw "getAddress() error"
-        } catch (e) {
-            logMyErrors(e);
+        }
+        catch(e) {
+            $("#mapMessage").text(e.message);
         }
     })
 
