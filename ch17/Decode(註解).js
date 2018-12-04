@@ -1,3 +1,8 @@
+/**
+ * 這次的章節主要是整合前面的種點 (筆者也說這是一份自我檢視的清單)
+ * 因此，所有的條件都應該符合 (符合我們挑選出的便利貼 即可)
+ */
+
  $(function(){
     //  從php來的宣告，已知有: message、urls、token...等
     var JS_VARS = JSON.parse(shops);
@@ -41,34 +46,33 @@
 
     // 監聽 encode copy 鈕
     $('.js_encode_copy').click(function(){
-        clickBtn(encode);
-    });
-
-    // 監聽 decode copy 鈕
-    $('.js_decode_copy').click(function(){
-        clickBtn(decode);
-    });
-
-    function clickBtn(action) {
-        var field = $('#' + action + '_text')
+        // 取得 (encode 的) text
+        var field = document.getElementById('encode_text')
             field.focus()
             field.select();
         var isCopysuccess = copySelectionText();
 
-        resultMsg(isCopysuccess);
-    }
-
-    /**
-     * 
-     * @param {boolean} isSuccess 
-     */
-    function resultMsg(isSuccess) {
-        if (isSuccess) {
+        if (isCopysuccess) {
             alert('已複製成功');
         } else {
             alert('複製失敗，請手動複製');
         }
-    }
+    });
+
+    // 監聽 decode copy 鈕
+    $('.js_decode_copy').click(function(){
+        // 取得 (decode 的) text
+        var field = document.getElementById('decode_text')
+            field.focus()
+            field.select();
+        var isCopysuccess = copySelectionText();
+
+        if (isCopysuccess) {
+            alert('已複製成功');
+        } else {
+            alert('複製失敗，請手動複製');
+        }
+    });
 
     function copySelectionText(){
         var copysuccess;
