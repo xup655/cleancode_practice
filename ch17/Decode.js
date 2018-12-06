@@ -2,9 +2,9 @@
   * 
   * 修改了原本dirty code
   * 
-  * 1. SRP單一職責: 原本的code在複製時，加碼判斷成功與否，並顯示訊息
-  * 2. 不傳過多參數: 因原結構有高度重複，所以提煉共用函式getConvertText，傳入action參數，就知道要執行的是加密還是解密
-  * 3. 只留有用的註解: 蚊組定義團隊的codiing style，在註解定義好參數的型別、簡寫視野大的類別做的事情
+  * 1. SRP單一職責: 原本的copySelectionText在複製時，加碼判斷是否成功並顯示訊息。
+  * 2. 不傳過多參數: 因原結構有高度重複，所以提煉共用函式getConvertText，傳入convertType，就知道要執行的是加密還是解密。
+  * 3. 只留有用的註解: 蚊組定義團隊的codiing style，在註解定義好參數的型別。
   * 
   */
  
@@ -17,28 +17,30 @@
 
     /**
      * 
-     * @param {object} action
+     * @param {object} convertType
      */
-    function getConvertText(action){
-        var output = (action == 'decode') ? 'encode' : 'decode';
-
-        var text = $.trim($('.js_' + action + '_text').val());
+    var convertType = {
+        decode: 'decode',
+        encode: 'encode'
+    }
+    function getConvertText(convertType){
+        var text = $.trim($('.js_' + convertType.input + '_text').val());
 
         $.post(JS_VARS.urls.YSecurity, {
             'text': text,
-            'type': action,
+            'type': convertType.input,
             _token: JS_VARS.token
         }, function(result){
-            $('.js_' + output +'_text').val(result.YSecurity_text)
+            $('.js_' + convertType.output +'_text').val(result.YSecurity_text)
         }, 'json');                     
     }
 
     $('.js_decode_btn').click(function(){
-        getConvertText('decode');
+        getConvertText(convertType.decode);
     });
 
     $('.js_encode_btn').click(function(){
-        getConvertText('encode');
+        getConvertText(convertType.encode);
     });
 
     /**
