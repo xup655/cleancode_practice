@@ -1,3 +1,13 @@
+/**
+  * 
+  * 修改了原本dirty code
+  * 
+  * 1. SRP單一職責: 原本的code在複製時，加碼判斷成功與否，並顯示訊息
+  * 2. 不傳過多參數: 因原結構有高度重複，所以提煉共用函式getConvertText，傳入action參數，就知道要執行的是加密還是解密
+  * 3. 只留有用的註解: 蚊組定義團隊的codiing style，在註解定義好參數的型別、簡寫視野大的類別做的事情
+  * 
+  */
+ 
  $(function(){
     var JS_VARS = JSON.parse(shops);
 
@@ -5,68 +15,67 @@
         alert(JS_VARS.message);
     }
 
-    $('.js_decode_btn').click(function(){
-        transformText('decode', 'encode');
-    });
-
-    $('.js_encode_btn').click(function(){
-        transformText('encode', 'decode');
-    });
-
     /**
      * 
-     * @param {string} inputVal 
-     * @param {string} output 
+     * @param {object} action
      */
-    function transformText(inputVal, output){
-        var text = $.trim($('.js_' + inputVal + '_text').val());
+    function getConvertText(action){
+        var output = (action == 'decode') ? 'encode' : 'decode';
+
+        var text = $.trim($('.js_' + action + '_text').val());
 
         $.post(JS_VARS.urls.YSecurity, {
             'text': text,
-            'type': inputVal,
+            'type': action,
             _token: JS_VARS.token
         }, function(result){
             $('.js_' + output +'_text').val(result.YSecurity_text)
         }, 'json');                     
     }
 
-    $('.js_encode_copy').click(function(){
-        clickBtn(encode);
+    $('.js_decode_btn').click(function(){
+        getConvertText('decode');
     });
 
-    $('.js_decode_copy').click(function(){
-        clickBtn(decode);
+    $('.js_encode_btn').click(function(){
+        getConvertText('encode');
     });
-
-    function clickBtn(action) {
-        var field = $('#' + action + '_text')
-            field.focus()
-            field.select();
-        var isCopysuccess = copySelectionText();
-
-        resultMsg(isCopysuccess, '複製');
-    }
 
     /**
      * 
-     * @param {boolean} isSuccess 
      * @param {string} action 
      */
-    function resultMsg(isSuccess, action) {
-        if (isSuccess) {
-            alert('已' + action + '成功');
+    function copyText(action) {
+        var field = $('#' + action + '_text')
+            field.focus()
+            field.select();
+
+        resultMsg();
+    }
+
+    function resultMsg() {
+        if (isCopysuccess) {
+            alert('已複製成功');
         } else { 
-            alert(action + '失敗，請手動' + action);
+            alert('複製失敗，請手動複製');
         }
     }
 
-    function copySelectionText(){
-        var copysuccess;
+    var isCopysuccess = function(){
+        var isSuccess;
         try{
-            copysuccess = document.execCommand("copy");
+            isSuccess = document.execCommand("copy");
         } catch(e){
-            copysuccess = false;
+            isSuccess = false;
         }
-        return copysuccess;
+        return isSuccess;
     }
+
+    $('.js_encode_copy').click(function(){
+        copyText('encode');
+    });
+
+    $('.js_decode_copy').click(function(){
+        copyText('decode');
+    });
 });
